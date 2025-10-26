@@ -11,12 +11,17 @@ import su.nightexpress.nightcore.db.connection.impl.SQLiteConnector;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public abstract class AbstractConnector {
 
     protected final NightPlugin  plugin;
     protected final HikariConfig config;
     protected final HikariDataSource dataSource;
+    protected final ThreadFactory factory;
+    protected final Executor executor;
 
     public AbstractConnector(@NotNull NightPlugin plugin, @NotNull DatabaseConfig config) {
         this.plugin = plugin;
@@ -29,6 +34,11 @@ public abstract class AbstractConnector {
         this.config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         this.config.setPoolName(plugin.getName() + "Pool");
         this.dataSource = new HikariDataSource(this.config);
+        this.factory = Thread.ofVirtual()
+                .name(String.format("nightcore-%s-database-worker-", plugin.getName()), 0)
+                .uncaughtExceptionHandler((thread, throwable) -> throwable.printStackTrace())
+                .factory();
+        this.executor = Executors.newFixedThreadPool(10, this.factory);
     }
 
     @NotNull
@@ -47,5 +57,9 @@ public abstract class AbstractConnector {
     @NotNull
     public final Connection getConnection() throws SQLException {
         return this.dataSource.getConnection();
+    }
+
+    public Executor getExecutor() {
+        return executor;
     }
 }

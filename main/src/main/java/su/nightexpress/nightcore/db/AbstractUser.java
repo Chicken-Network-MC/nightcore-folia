@@ -88,7 +88,6 @@ public abstract class AbstractUser {
         this.autoSaveTime = TimeUtil.createFutureTimestamp(seconds);
     }
 
-
     public boolean isAutoSyncPlanned() {
         return this.autoSyncTime > 0;
     }

@@ -235,11 +235,11 @@ public abstract class AbstractUserManager<P extends NightPlugin, U extends Abstr
     }
 
     public final CompletableFuture<U> getUserDataAsync(@NotNull String name) {
-        return CompletableFuture.supplyAsync(() -> this.getOrFetch(name));
+        return CompletableFuture.supplyAsync(() -> this.getOrFetch(name), this.dataManager.getConnector().getExecutor());
     }
 
     public final CompletableFuture<U> getUserDataAsync(@NotNull UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> this.getOrFetch(uuid));
+        return CompletableFuture.supplyAsync(() -> this.getOrFetch(uuid), this.dataManager.getConnector().getExecutor());
     }
 
     /**

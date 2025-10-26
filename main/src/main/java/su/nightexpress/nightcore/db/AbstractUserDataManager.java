@@ -134,10 +134,12 @@ public abstract class AbstractUserDataManager <P extends NightPlugin, U extends 
     }
 
     public void saveUsers(@NotNull Collection<U> users) {
-        UpdateQuery<U> query = UserQueries.update();
-        this.addUpsertQueryData(query);
+        connector.getExecutor().execute(() -> {
+            UpdateQuery<U> query = UserQueries.update();
+            this.addUpsertQueryData(query);
 
-        this.update(this.tableUsers, query, users);
+            this.update(this.tableUsers, query, users);
+        });
     }
 
     public void insertUser(@NotNull U user) {

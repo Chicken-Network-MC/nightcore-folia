@@ -82,6 +82,27 @@
             <id>phoenix</id>
             <url>https://nexus.phoenixdevt.fr/repository/maven-public/</url>
         </repository>
+
+        <repository>
+            <id>nexo</id>
+            <url>https://repo.nexomc.com/releases</url>
+        </repository>
+
+        <repository>
+            <id>nightexpress-releases</id>
+            <url>https://repo.nightexpressdev.com/releases</url>
+        </repository>
+
+        <repository>
+            <id>reposilite-repository-snapshots</id>
+            <name>Reposilite Repository</name>
+            <url>https://repo.triumphteam.dev/snapshots</url>
+        </repository>
+
+        <repository>
+            <id>AlessioDP</id>
+            <url>https://repo.alessiodp.com/releases/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -189,27 +210,6 @@
         </dependency>
 
         <dependency>
-            <groupId>me.mraxetv.beasttokens</groupId>
-            <artifactId>BeastTokens</artifactId>
-            <version>3.11.1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.bencodez</groupId>
-            <artifactId>votingplugin</artifactId>
-            <version>6.15.1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.magmaguy.elitemobs</groupId>
-            <artifactId>EliteMobs</artifactId>
-            <version>8.5.4</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>su.nightexpress.coinsengine</groupId>
             <artifactId>CoinsEngine</artifactId>
             <version>2.5.0</version>
@@ -225,23 +225,23 @@
 
         <!-- Item Bridge -->
         <dependency>
-            <groupId>com.nexomc.nexo</groupId>
-            <artifactId>Nexo</artifactId>
-            <version>0.9-dev</version>
+            <groupId>com.nexomc</groupId>
+            <artifactId>nexo</artifactId>
+            <version>1.1.0</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.Anon8281</groupId>
+            <artifactId>UniversalScheduler</artifactId>
+            <version>0.1.7</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>su.nightexpress.excellentcrates</groupId>
             <artifactId>ExcellentCrates</artifactId>
             <version>6.4.1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.th0rgal.oraxen</groupId>
-            <artifactId>Oraxen</artifactId>
-            <version>1.155.1</version>
             <scope>provided</scope>
         </dependency>
 
@@ -266,20 +266,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Local -->
-        <dependency>
-            <groupId>com.ssomar.score</groupId>
-            <artifactId>SCore</artifactId>
-            <version>5.24.12.29</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.Anon8281</groupId>
-            <artifactId>UniversalScheduler</artifactId>
-            <version>0.1.6</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <build>
