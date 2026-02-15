@@ -2,10 +2,13 @@ package su.nightexpress.nightcore;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.event.EventPriority;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nightcore.bridge.chat.UniversalChatEventHandler;
 import su.nightexpress.nightcore.bridge.paper.PaperBridge;
 import su.nightexpress.nightcore.bridge.spigot.SpigotBridge;
+import su.nightexpress.nightcore.chat.ChatManager;
 import su.nightexpress.nightcore.commands.command.NightCommand;
 import su.nightexpress.nightcore.config.PluginDetails;
 import su.nightexpress.nightcore.core.CoreConfig;
@@ -18,6 +21,7 @@ import su.nightexpress.nightcore.integration.currency.CurrencyManager;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.ui.UIUtils;
 import su.nightexpress.nightcore.ui.dialog.DialogWatcher;
+import su.nightexpress.nightcore.ui.inventory.MenuRegistry;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.blocktracker.PlayerBlockTracker;
 import su.nightexpress.nightcore.util.bridge.Software;
@@ -33,8 +37,11 @@ public class NightCore extends NightPlugin {
 
     private static NightCore core;
 
+    private final ChatManager chatManager;
+
     private TagManager    tagManager;
     private CoreManager   coreManager;
+    private MenuRegistry menuRegistry;
     private DialogWatcher dialogWatcher;
     private CurrencyManager currencyManager;
 
@@ -43,6 +50,10 @@ public class NightCore extends NightPlugin {
         if (core == null) throw new IllegalStateException("NightCore is not initialized!");
 
         return core;
+    }
+
+    public NightCore() {
+        this.chatManager = new ChatManager(this);
     }
 
     @Override
@@ -70,7 +81,7 @@ public class NightCore extends NightPlugin {
         Version version = Version.detect();
         if (!version.isDropped()) {
             Software.INSTANCE.load(Version.isPaper() ? new PaperBridge() : new SpigotBridge());
-            this.info("Server version detected as " + version.getLocalized() + ". Using " + Software.instance().getName() + ".");
+            this.info("Server version detected as " + version.getLocalized() + ". Using " + Software.get().getName() + ".");
 
             if (!testNbt()) {
                 this.error("Could not initialize NBT Utils.");
@@ -84,6 +95,14 @@ public class NightCore extends NightPlugin {
     }
 
     @Override
+    protected void onStartup() {
+        super.onStartup();
+
+        this.menuRegistry = new MenuRegistry(this);
+        this.chatManager.setup();
+    }
+
+    @Override
     public void enable() {
         LangAssets.load(this);
         UIUtils.load(this);
@@ -94,6 +113,8 @@ public class NightCore extends NightPlugin {
 
         this.coreManager = new CoreManager(this);
         this.coreManager.setup();
+
+        this.menuRegistry.setup();
 
         this.currencyManager = new CurrencyManager(this);
         this.currencyManager.setup();
@@ -109,6 +130,7 @@ public class NightCore extends NightPlugin {
     @Override
     public void disable() {
         if (this.dialogWatcher != null) this.dialogWatcher.shutdown();
+        if (this.menuRegistry != null) this.menuRegistry.shutdown();
         if (this.coreManager != null) this.coreManager.shutdown();
         if (this.tagManager != null) this.tagManager.shutdown();
         if (this.currencyManager != null) this.currencyManager.shutdown();
@@ -122,6 +144,8 @@ public class NightCore extends NightPlugin {
         super.onShutdown();
         PlayerProfiles.clear();
         PlayerBlockTracker.shutdown();
+
+        this.chatManager.shutdown();
 
         CHILDRENS.clear();
         core = null;
@@ -164,5 +188,25 @@ public class NightCore extends NightPlugin {
             exception.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public void addChatHandler(@NotNull EventPriority priority, @NotNull UniversalChatEventHandler handler) {
+        this.chatManager.addHandler(priority, handler);
+    }
+
+    @Override
+    public void removeChatHandler(@NotNull UniversalChatEventHandler handler) {
+        this.chatManager.removeHandler(handler);
+    }
+
+    @NotNull
+    public MenuRegistry getMenuRegistry() {
+        return this.menuRegistry;
+    }
+
+    @NotNull
+    public ChatManager getChatManager() {
+        return this.chatManager;
     }
 }

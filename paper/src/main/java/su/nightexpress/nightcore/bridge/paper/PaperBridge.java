@@ -22,6 +22,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
@@ -33,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nightcore.bridge.bossbar.NightBarColor;
 import su.nightexpress.nightcore.bridge.bossbar.NightBarFlag;
 import su.nightexpress.nightcore.bridge.bossbar.NightBarOverlay;
+import su.nightexpress.nightcore.bridge.chat.UniversalChatListenerCallback;
 import su.nightexpress.nightcore.bridge.dialog.adapter.DialogAdapter;
 import su.nightexpress.nightcore.bridge.dialog.response.DialogClickHandler;
 import su.nightexpress.nightcore.bridge.dialog.wrap.WrappedDialog;
@@ -40,6 +42,8 @@ import su.nightexpress.nightcore.bridge.paper.bossbar.PaperBossBar;
 import su.nightexpress.nightcore.bridge.paper.bossbar.PaperBossBarAdapter;
 import su.nightexpress.nightcore.bridge.paper.dialog.PaperDialogAdapter;
 import su.nightexpress.nightcore.bridge.paper.dialog.PaperDialogListener;
+import su.nightexpress.nightcore.bridge.paper.event.PaperChatListener;
+import su.nightexpress.nightcore.bridge.paper.event.PaperEventAdapter;
 import su.nightexpress.nightcore.bridge.paper.text.PaperTextComponentAdapter;
 import su.nightexpress.nightcore.bridge.wrap.NightProfile;
 import su.nightexpress.nightcore.util.BukkitThing;
@@ -57,6 +61,7 @@ public class PaperBridge implements Software {
 
     private DialogAdapter<?>             dialogAdapter;
     private PaperTextComponentAdapter textComponentAdapter;
+    private PaperEventAdapter eventAdapter;
 
     private Set<DataComponentType> commonComponentsToHide;
 
@@ -90,13 +95,31 @@ public class PaperBridge implements Software {
             this.commonComponentsToHide.remove(DataComponentTypes.TOOLTIP_STYLE);
         }
 
+        this.eventAdapter = new PaperEventAdapter(this.textComponentAdapter);
         return true;
+    }
+
+    @Override
+    @NotNull
+    public PaperEventAdapter eventAdapter() {
+        return this.eventAdapter;
+    }
+
+    @Override
+    @NotNull
+    public Listener createChatListener(@NotNull UniversalChatListenerCallback callback) {
+        return new PaperChatListener(this, callback);
     }
 
     @Override
     @NotNull
     public Listener createDialogListener(@NotNull DialogClickHandler handler) {
         return new PaperDialogListener(handler);
+    }
+
+    @Override
+    public void disallowLogin(@NotNull AsyncPlayerPreLoginEvent event, AsyncPlayerPreLoginEvent.@NotNull Result result, @NotNull NightComponent message) {
+        event.disallow(result, this.textComponentAdapter.adaptComponent(message));
     }
 
     @Override
@@ -235,6 +258,54 @@ public class PaperBridge implements Software {
     }
 
 
+    @Override
+    @NotNull
+    public String getDisplayNameSerialized(@NotNull Player player) {
+        return serializeComponent(player.displayName());
+    }
+
+    @Override
+    public void setDisplayName(@NotNull Player player, @NotNull NightComponent component) {
+        player.displayName(this.adaptComponent(component));
+    }
+
+    @Override
+    @Nullable
+    public String getPlayerListHeaderSerialized(@NotNull Player player) {
+        Component header = player.playerListHeader();
+        return header == null ? null : serializeComponent(header);
+    }
+
+    @Override
+    @Nullable
+    public String getPlayerListFooterSerialized(@NotNull Player player) {
+        Component footer = player.playerListFooter();
+        return footer == null ? null : serializeComponent(footer);
+    }
+
+    @Override
+    public void setPlayerListHeaderFooter(@NotNull Player player, @Nullable NightComponent header, @Nullable NightComponent footer) {
+        Component paperHeader = header == null ? Component.empty() : this.adaptComponent(header);
+        Component paperFooter = footer == null ? Component.empty() : this.adaptComponent(footer);
+
+        player.sendPlayerListHeaderAndFooter(paperHeader, paperFooter);
+    }
+
+    @Override
+    @NotNull
+    public String getPlayerListNameSerialized(@NotNull Player player) {
+        return serializeComponent(player.playerListName());
+    }
+
+    @Override
+    public void setPlayerListName(@NotNull Player player, @NotNull NightComponent name) {
+        player.playerListName(this.adaptComponent(name));
+    }
+
+    @Override
+    public void kick(@NotNull Player player, @Nullable NightComponent component) {
+        player.kick(component == null ? null : this.adaptComponent(component));
+    }
 
     @Override
     public void setCustomName(@NotNull Entity entity, @NotNull NightComponent component) {

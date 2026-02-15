@@ -1,9 +1,12 @@
 package su.nightexpress.nightcore;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nightcore.bridge.chat.UniversalChatEventHandler;
 import su.nightexpress.nightcore.command.CommandManager;
 import su.nightexpress.nightcore.command.api.NightPluginCommand;
 import su.nightexpress.nightcore.commands.command.NightCommand;
@@ -12,7 +15,6 @@ import su.nightexpress.nightcore.config.PluginDetails;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.language.LangManager;
 import su.nightexpress.nightcore.locale.LangContainer;
-import su.nightexpress.nightcore.locale.LangElement;
 import su.nightexpress.nightcore.locale.LangRegistry;
 import su.nightexpress.nightcore.menu.impl.AbstractMenu;
 import su.nightexpress.nightcore.ui.menu.MenuRegistry;
@@ -257,10 +259,29 @@ public abstract class NightPlugin extends JavaPlugin implements NightCorePlugin 
         return this.commandManager;
     }
 
+    @Override
+    public void registerListener(@NotNull Listener listener) {
+        this.getPluginManager().registerEvents(listener, this);
+    }
+
+    @Override
+    public void addChatHandler(@NotNull EventPriority priority, @NotNull UniversalChatEventHandler handler) {
+        NightCore.get().addChatHandler(priority, handler);
+    }
+
+    @Override
+    public void removeChatHandler(@NotNull UniversalChatEventHandler handler) {
+        NightCore.get().removeChatHandler(handler);
+    }
+
     public void registerLang(@NotNull Class<? extends LangContainer> clazz) {
         this.langRegistry.register(clazz);
     }
 
+    @Override
+    public void injectLang(@NotNull Class<? extends LangContainer> langClass) {
+        this.langRegistry.inject(langClass);
+    }
 
     @Override
     public void injectLang(@NotNull LangContainer langContainer) {
@@ -312,5 +333,11 @@ public abstract class NightPlugin extends JavaPlugin implements NightCorePlugin 
         this.warn("=".repeat(35));
 
         return !current.isDropped();
+    }
+
+    @Override
+    @NotNull
+    public su.nightexpress.nightcore.ui.inventory.MenuRegistry getMenuRegistry() {
+        return NightCore.get().getMenuRegistry();
     }
 }

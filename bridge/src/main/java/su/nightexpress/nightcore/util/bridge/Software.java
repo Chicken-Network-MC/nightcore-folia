@@ -10,6 +10,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
@@ -21,8 +22,10 @@ import su.nightexpress.nightcore.bridge.bossbar.NightBarColor;
 import su.nightexpress.nightcore.bridge.bossbar.NightBarFlag;
 import su.nightexpress.nightcore.bridge.bossbar.NightBarOverlay;
 import su.nightexpress.nightcore.bridge.bossbar.NightBossBar;
+import su.nightexpress.nightcore.bridge.chat.UniversalChatListenerCallback;
 import su.nightexpress.nightcore.bridge.dialog.response.DialogClickHandler;
 import su.nightexpress.nightcore.bridge.dialog.wrap.WrappedDialog;
+import su.nightexpress.nightcore.bridge.event.EventAdapter;
 import su.nightexpress.nightcore.bridge.text.adapter.TextComponentAdapter;
 import su.nightexpress.nightcore.bridge.wrap.NightProfile;
 import su.nightexpress.nightcore.util.bridge.wrapper.NightComponent;
@@ -75,7 +78,13 @@ public interface Software {
 
     int nextEntityId();
 
+    @NotNull EventAdapter eventAdapter();
+
+    @NotNull Listener createChatListener(@NotNull UniversalChatListenerCallback callback);
+
     @NotNull Listener createDialogListener(@NotNull DialogClickHandler handler);
+
+    void disallowLogin(@NotNull AsyncPlayerPreLoginEvent event, @NotNull AsyncPlayerPreLoginEvent.Result result, @NotNull NightComponent message);
 
     void closeDialog(@NotNull Player player);
 
@@ -116,6 +125,23 @@ public interface Software {
     @NotNull String getTranslationKey(@NotNull EntityType entityType);
 
     @NotNull String getTranslationKey(@NotNull PotionEffectType effectType);
+
+
+    @NotNull String getDisplayNameSerialized(@NotNull Player player);
+
+    void setDisplayName(@NotNull Player player, @NotNull NightComponent component);
+
+    @Nullable String getPlayerListHeaderSerialized(@NotNull Player player);
+
+    @Nullable String getPlayerListFooterSerialized(@NotNull Player player);
+
+    void setPlayerListHeaderFooter(@NotNull Player player, @Nullable NightComponent header, @Nullable NightComponent footer);
+
+    @NotNull String getPlayerListNameSerialized(@NotNull Player player);
+
+    void setPlayerListName(@NotNull Player player, @NotNull NightComponent name);
+
+    void kick(@NotNull Player player, @Nullable NightComponent component);
 
 
     void setCustomName(@NotNull Entity entity, @NotNull NightComponent component);
